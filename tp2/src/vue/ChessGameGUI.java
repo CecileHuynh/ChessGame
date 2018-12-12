@@ -72,7 +72,6 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
 	private int xAdjustment;
 	private int yAdjustment;
 
-
 	/**
 	 * 
 	 * Construit le plateau de l'echiquier sous forme de damier 8*8
@@ -154,6 +153,7 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
 				this.chessBoardGuiContainer.add( square );
 			}
 		}
+		
 	}
 	
 	private void clearGrid() {
@@ -165,33 +165,28 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
 		}
 	}
 	
+	//show the possible move when a piece is being clicked
 	private void colorIndicator(List<Coord> listCoord){
-		JPanel square = null;
 		
-		for (int i = 0; i<8; i++){
-			for (int j = 0; j<8; j++) {
-
-				for(int k=0;k<listCoord.size();k++){
-					if(listCoord.get(k).x==j && listCoord.get(k).y==i)
-					{
-						square = new JPanel( new BorderLayout() );
-						square.setBackground(new Color(100,250,240));
-					}
-				
-				else{
-					// creation d'un JPanel pour le carre blanc ou noir
-					square = new JPanel( new BorderLayout() );
-					int row = i % 2;
-					if (row == 0) {
-						square.setBackground( j % 2 != 0 ? new Color(139,69,0) : new Color(255,250,240)  ); 
-					}
-					else {
-						square.setBackground( j % 2 != 0 ? new Color(255,250,240): new Color(139,69,0) );
-					}
-					}
-				}
-				// ajout du carre sur le damier
-				this.chessBoardGuiContainer.add( square );
+		Iterator<Coord> i = listCoord.iterator();
+		while(i.hasNext()){
+			Coord coordCase = i.next();
+			JPanel panel = (JPanel)chessBoardGuiContainer.getComponent(coordCase.x+(coordCase.y)*8);
+			panel.setBackground(Color.orange);
+		}
+	}
+	
+	private void colorIndicatorClear(List<Coord> listCoord){
+		Iterator<Coord> i = listCoord.iterator();
+		while(i.hasNext()){
+			Coord coordCase = i.next();
+			JPanel panel = (JPanel)chessBoardGuiContainer.getComponent(coordCase.x+(coordCase.y)*8);
+			int row = coordCase.x % 2;
+			if (row == 0) {
+				panel.setBackground( coordCase.y % 2 != 0 ? new Color(139,69,0) : new Color(255,250,240)  ); 
+			}
+			else {
+				panel.setBackground( coordCase.y % 2 != 0 ? new Color(255,250,240): new Color(139,69,0) );
 			}
 		}
 	}
@@ -246,8 +241,8 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
 
 			// Si c'est bien le tour de jeu du joueur
 			if (this.chessGameControler.isPlayerOK(initCoord))	{
-				listCoord=this.chessGameControler.moveIndicator(initCoord);
-				this.colorIndicator(listCoord);
+				
+				
 				this.pieceToMove = (JLabel)c;
 
 				// Mise en place du déplacement visuel de l'image de la pièce
@@ -262,8 +257,9 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
 
 				// Mise en évidence des cases vers lesquelles 
 				// la pièce peut être déplacée 	
-				
-				// ToDo
+				listCoord=this.chessGameControler.moveIndicator(initCoord);
+				System.out.println(initCoord);
+				this.colorIndicator(listCoord);
 			}
 		}
 	}
@@ -286,10 +282,16 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
 	public void mouseReleased(MouseEvent e) {
 
 		Coord  finalCoord = null ;
-		//this.pieceToMove.setVisible(false);
+					
+		//clear the cases of the possible moves prints
+		List<Coord> listCoord=new ArrayList<>();
+		listCoord=this.chessGameControler.moveIndicator(initCoord);
+		this.colorIndicatorClear(listCoord);
+		
+		
 		if(this.pieceToMove != null) {
 
-			this.pieceToMove.setVisible(false);
+			
 
 			finalCoord = translateCoord(e.getX(), e.getY());
 			
@@ -302,14 +304,26 @@ public class ChessGameGUI extends JFrame implements MouseListener, MouseMotionLi
 
 			// Invoque la methode de deplacement de l'echiquier	
 			// qui invoque aussi la méthode de promotion du pion si besoin
-			this.chessGameControler.move(this.initCoord, finalCoord);
-
+			if(this.chessGameControler.move(this.initCoord, finalCoord)){
+				this.pieceToMove.setVisible(false);
+			}
+			else{
+				this.pieceToMove.setVisible(true);
+			}
+			
+			
+			
+			
 			// l'echiquier étant observé par cette vue (fenetre)
 			// des lors qu'il est modifie par l'invocation de la méthode move(),
 			// la vue en est avertie et
 			// sa methode update est appelee pour rafraichir l'affichage du damier
-
-
+			
+			
+			
+		}
+		else{
+			this.pieceToMove.setVisible(true);
 		}
 	}
 

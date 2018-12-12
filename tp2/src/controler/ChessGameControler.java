@@ -18,8 +18,9 @@ public class ChessGameControler implements ChessGameControlers {
 		int yInit=initCoord.y;
 		int xFinal=finalCoord.x;
 		int yFinal=finalCoord.y;
-		this.chessGame.move(xInit, yInit, xFinal, yFinal);
-		return false;
+		boolean ret=false;
+		ret=this.chessGame.move(xInit, yInit, xFinal, yFinal);
+		return ret;
 	}
 	
 	@Override
